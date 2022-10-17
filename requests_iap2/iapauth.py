@@ -5,7 +5,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from requests.auth import AuthBase
 
-from .get_oauth_creds import get_credentials
+from requests_iap2.get_oauth_creds import get_credentials
 
 # https://cloud.google.com/iap/docs/authentication-howto
 
@@ -25,14 +25,16 @@ class IAPAuth(requests.auth.AuthBase):
     def __init__(
         self,
         credentials: Credentials = None,
+        project_id: str = None,
         server_oauth_client_id: str = None,
         client_oauth_client_id: str = None,
         client_oauth_client_secret: str = None,
-        credentials_file: str = None,
+        credentials_cache: str = None,
     ):
         if credentials is None:
             credentials = get_credentials(
-                filename=credentials_file,
+                project_id=project_id,
+                credentials_cache=credentials_cache,
                 client_id=client_oauth_client_id,
                 client_secret=client_oauth_client_secret,
             )
@@ -92,10 +94,7 @@ if __name__ == "__main__":
 
     # Create a requests Session object and set the authentication handler
     session = requests.Session()
-    session.auth = IAPAuth(
-        credentials_file="ce_stac_auth",
-        server_oauth_client_id="45034861422-2nlvg69msb7mdqsrnsqlia4sp0r6t73s.apps.googleusercontent.com",
-    )
+    session.auth = IAPAuth()
 
     # Make the request
     r = session.get(url)

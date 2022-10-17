@@ -2,7 +2,6 @@ from pathlib import Path
 import json
 from google.oauth2.credentials import Credentials
 
-
 _DEFAULT_OAUTH_PARAMS = {
     "installed": {
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -12,38 +11,51 @@ _DEFAULT_OAUTH_PARAMS = {
     }
 }
 
+_DEFAULT_CACHE_FILENAME = ".requests_iap2_credentials.json"
 
-def get_credentials(filename="requests_iap_auth", client_id=None, client_secret=None):
-    creds = get_oauth_creds(filename, client_id, client_secret)
+_DEFAULT_PORT = 8044
+
+
+def get_credentials(project_id=None, client_id=None, client_secret=None, credentials_cache=None):
+    creds = get_oauth_creds(project_id=project_id, credentials_cache=credentials_cache, client_id=client_id,
+                            client_secret=client_secret)
     if "expiry" in creds:
         del creds["expiry"]
     return Credentials(**creds)
 
 
-def get_oauth_creds(filename, project_id=None, client_id=None, client_secret=None):
-    if Path.exists(Path.home() / filename):
-        with open(Path.home() / filename) as f:
-            creds = json.load(f)
-            if "expiry" in creds:
-                del creds["expiry"]
-    else:
-        if client_id is None or client_secret is None or project_id is None:
-            raise ValueError(
-                "Must provide client_id, client_secret, and project_id for first-time auth"
-            )
+def get_oauth_creds(project_id=None, client_id=None, client_secret=None, credentials_cache=None):
+    if credentials_cache is None:
+        credentials_cache = Path.home() / _DEFAULT_CACHE_FILENAME
 
-        creds = auth_flow(project_id, client_id, client_secret)
-        with open(Path.home() / filename, "w") as f:
-            creds_copy = creds.copy(deep=True)
-            if "expiry" in creds_copy:
-                del creds_copy["expiry"]
-            json.dump(creds_copy, f)
+    if Path.exists(credentials_cache):
+        with open(credentials_cache) as f:
+            try:
+                creds = json.load(f)
+                if "expiry" in creds:
+                    del creds["expiry"]
+                return creds
+            except json.decoder.JSONDecodeError:
+                pass
+
+    creds = auth_flow(project_id=project_id, client_id=client_id, client_secret=client_secret)
+    with open(credentials_cache, "w") as f:
+        creds_copy = creds.copy()
+        if "expiry" in creds_copy:
+            del creds_copy["expiry"]
+        json.dump(creds_copy, f)
 
     return creds
 
 
 def auth_flow(project_id, client_id, client_secret):
     """Returns a dictionary of environment variables needed for authentication."""
+
+    if client_id is None or client_secret is None or project_id is None:
+        raise ValueError(
+            "Must provide client_id, client_secret, and project_id for first-time auth"
+        )
+
     from google_auth_oauthlib.flow import InstalledAppFlow
 
     client_config = _DEFAULT_OAUTH_PARAMS.copy()
@@ -61,12 +73,20 @@ def auth_flow(project_id, client_id, client_secret):
         ],
     )
 
-    credentials = flow.run_local_server(
-        host="localhost",
-        port=8044,
-        authorization_prompt_message="Please visit this URL: {url}",
-        success_message="The auth flow is complete; you may close this window.",
-        open_browser=True,
-    )
+    credentials = None
+    port = _DEFAULT_PORT
+    while credentials is None:
+        try:
+            credentials = flow.run_local_server(
+                host="localhost",
+                port=port,
+                authorization_prompt_message="Please visit this URL: {url}",
+                success_message="The auth flow is complete; you may close this window.",
+                open_browser=True,
+            )
+        except OSError:
+            port += 1
+            if port > _DEFAULT_PORT + 100:
+                raise
 
     return json.loads(credentials.to_json())

@@ -4,7 +4,7 @@ Google Cloud [Identity-Aware Proxy](https://cloud.google.com/iap/) using **user*
 
 This is in contrast to most other IAP authentication libraries which use **service account** credentials.
 
-Original inpiration came from https://github.com/kiwicom/requests-iap 
+Original inspiration came from https://github.com/kiwicom/requests-iap 
 
 ## Installation
 
@@ -14,17 +14,20 @@ pip install git+https://github.com/climateengine/requests-iap2@main
 
 ## Usage
 
+### Setup
 You will need to have a Google Cloud project with IAP enabled and a user account with `IAP Webapp User` role.
 
 Additionally, you will need to create 2 OAuth 2.0 client IDs in the Google Cloud Console:
 one for the IAP server (created as a Web application) and one for the client application (created as a Desktop application).
 You will need the client ID and secret for the client application.
 
-Set you application default credentials using the following:
+If you have not already set up Application Default Credentials, you will need to do so with the following command:
 ```shell
 gcloud auth login
-gcloud application-default login
+gcloud auth application-default login
 ```
+
+### Example
 
 ```python
 import requests
@@ -36,10 +39,10 @@ url = "https://stac-staging.climateengine.net/"
 # Create a requests Session object and set the authentication handler
 session = requests.Session()
 session.auth = IAPAuth(
+    project_id="my-project-id",
     server_oauth_client_id="something.apps.googleusercontent.com",
     client_oauth_client_id="something_else.apps.googleusercontent.com",
     client_oauth_client_secret="client_secret_fjnclakjwencaiewnl",
-    credentials_file="credentials_cache.json",
 )
 
 resp = session.get(url)
@@ -47,17 +50,26 @@ resp = session.get(url)
 # Alternatively, you can use the IAPAuth without a Session object
 resp = requests.get(url,
                     auth=IAPAuth(
+                        project_id="my-project-id",
                         server_oauth_client_id="something.apps.googleusercontent.com",
                         client_oauth_client_id="something_else.apps.googleusercontent.com",
-                        client_oauth_client_secret="client_secret_fjnclakjwencaiewnl",
-                        credentials_file="credentials_cache.json"),
+                        client_oauth_client_secret="client_secret_fjnclakjwencaiewnl"),
                     )
 ```
 
 ### Caching
-Credentials are cached in a file specified by the `credentials_file` parameter.
-If this file exists, it will be used to load the credentials, and specifying `client_oauth_client_id` and 
-`client_oauth_client_secret` will be optional.
+Credentials are cached in a file specified by the `credentials_cache` parameter.
+The default is `~/.requests_iap2_credentials.json`.
+If this file exists, it will be used to load the credentials, and specifying `project_id`, `client_oauth_client_id` and 
+`client_oauth_client_secret` will be optional. i.e. you won't need to specify these parameters again:
+
+```python
+import requests
+from requests_iap2 import IAPAuth
+
+session = requests.Session()
+session.auth = IAPAuth()
+```
 
 ## Code formatting
 
