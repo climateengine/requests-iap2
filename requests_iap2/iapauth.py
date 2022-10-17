@@ -5,7 +5,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from requests.auth import AuthBase
 
-from get_oauth_creds import get_credentials
+from .get_oauth_creds import get_credentials
 
 # https://cloud.google.com/iap/docs/authentication-howto
 
