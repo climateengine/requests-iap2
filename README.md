@@ -28,7 +28,7 @@ gcloud application-default login
 
 ```python
 import requests
-from requests_iap import IAPAuth
+from requests_iap2 import IAPAuth
 
 # This is the URL of the IAP-protected resource
 url = "https://stac-staging.climateengine.net/"
@@ -36,9 +36,9 @@ url = "https://stac-staging.climateengine.net/"
 # Create a requests Session object and set the authentication handler
 session = requests.Session()
 session.auth = IAPAuth(
-    server_oauth_client_id = "something.apps.googleusercontent.com",
-    client_oauth_client_id = "something_else.apps.googleusercontent.com",
-    client_oauth_client_secret = "client_secret_fjnclakjwencaiewnl",
+    server_oauth_client_id="something.apps.googleusercontent.com",
+    client_oauth_client_id="something_else.apps.googleusercontent.com",
+    client_oauth_client_secret="client_secret_fjnclakjwencaiewnl",
     credentials_file="credentials_cache.json",
 )
 
@@ -46,13 +46,12 @@ resp = session.get(url)
 
 # Alternatively, you can use the IAPAuth without a Session object
 resp = requests.get(url,
-    auth=IAPAuth(
-        server_oauth_client_id = "something.apps.googleusercontent.com",
-        client_oauth_client_id = "something_else.apps.googleusercontent.com",
-        client_oauth_client_secret = "client_secret_fjnclakjwencaiewnl",
-        credentials_file="credentials_cache.json",
-    ),
-)
+                    auth=IAPAuth(
+                        server_oauth_client_id="something.apps.googleusercontent.com",
+                        client_oauth_client_id="something_else.apps.googleusercontent.com",
+                        client_oauth_client_secret="client_secret_fjnclakjwencaiewnl",
+                        credentials_file="credentials_cache.json"),
+                    )
 ```
 
 ### Caching
