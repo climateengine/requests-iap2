@@ -27,7 +27,6 @@ class IAPAuth(requests.auth.AuthBase):
     def __init__(
         self,
         credentials: Credentials = None,
-        project_id: str = None,
         server_oauth_client_id: str = None,
         client_oauth_client_id: str = None,
         client_oauth_client_secret: str = None,
@@ -35,7 +34,6 @@ class IAPAuth(requests.auth.AuthBase):
     ):
         if credentials is None:
             credentials = get_credentials(
-                project_id=project_id,
                 credentials_cache=credentials_cache,
                 client_id=client_oauth_client_id,
                 client_secret=client_oauth_client_secret,
@@ -50,7 +48,7 @@ class IAPAuth(requests.auth.AuthBase):
             r.status_code == 401
             and r.headers.get("X-Goog-IAP-Generated-Response") == "true"
         ):
-            print("IAPAuth: 401 response from IAP, retrying with new aud claim")
+            # print("IAPAuth: 401 response from IAP, retrying with new aud claim")
             try:
                 aud = re.search(r"expected value \((.*)\)\)$", r.text).group(1)
             except AttributeError:

@@ -40,7 +40,6 @@ url = "https://stac-staging.climateengine.net/"
 # Create a requests Session object and set the authentication handler
 session = requests.Session()
 session.auth = IAPAuth(
-    project_id="my-project-id",
     server_oauth_client_id="something.apps.googleusercontent.com",  # optional
     client_oauth_client_id="something_else.apps.googleusercontent.com",
     client_oauth_client_secret="client_secret_fjnclakjwencaiewnl",
@@ -51,7 +50,6 @@ resp = session.get(url)
 # Alternatively, you can use the IAPAuth without a Session object
 resp = requests.get(url,
                     auth=IAPAuth(
-                        project_id="my-project-id",
                         server_oauth_client_id="something.apps.googleusercontent.com",  # optional
                         client_oauth_client_id="something_else.apps.googleusercontent.com",
                         client_oauth_client_secret="client_secret_fjnclakjwencaiewnl"),
@@ -61,7 +59,7 @@ resp = requests.get(url,
 ### Caching
 Credentials are cached in a file specified by the optional `credentials_cache` parameter.
 The default is `~/.requests_iap2_credentials.json`.
-If this file exists, it will be used to load the credentials, and specifying `project_id`, `client_oauth_client_id` and 
+If this file exists, it will be used to load the credentials, and specifying `client_oauth_client_id` and 
 `client_oauth_client_secret` will be optional. i.e. you won't need to specify these parameters again:
 
 ```python
