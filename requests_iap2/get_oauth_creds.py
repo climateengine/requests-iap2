@@ -17,8 +17,11 @@ _DEFAULT_PORT = 8044
 
 
 def get_credentials(client_id=None, client_secret=None, credentials_cache=None):
-    creds = get_oauth_creds(credentials_cache=credentials_cache, client_id=client_id,
-                            client_secret=client_secret)
+    creds = get_oauth_creds(
+        credentials_cache=credentials_cache,
+        client_id=client_id,
+        client_secret=client_secret,
+    )
     if "expiry" in creds:
         del creds["expiry"]
     return Credentials(**creds)
@@ -52,9 +55,7 @@ def auth_flow(client_id, client_secret):
     """Returns a dictionary of environment variables needed for authentication."""
 
     if client_id is None or client_secret is None:
-        raise ValueError(
-            "Must provide client_id and client_secret for first-time auth"
-        )
+        raise ValueError("Must provide client_id and client_secret for first-time auth")
 
     from google_auth_oauthlib.flow import InstalledAppFlow
 

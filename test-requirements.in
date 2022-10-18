@@ -1,4 +1,0 @@
-pytest<5.0.0
-pytest-cov
-pytest-mock
-more-itertools==5.0.0
