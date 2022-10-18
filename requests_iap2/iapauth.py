@@ -1,11 +1,13 @@
 import datetime
+import re
 
 import requests
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from requests.auth import AuthBase
+from requests.auth import AuthBase, extract_cookies_to_jar
 
 from requests_iap2.get_oauth_creds import get_credentials
+
 
 # https://cloud.google.com/iap/docs/authentication-howto
 
@@ -43,8 +45,43 @@ class IAPAuth(requests.auth.AuthBase):
         self._oidc_token = None
         self._id_token = None
 
+    def handle_401(self, r, **kwargs):
+        if (
+            r.status_code == 401
+            and r.headers.get("X-Goog-IAP-Generated-Response") == "true"
+        ):
+            print("IAPAuth: 401 response from IAP, retrying with new aud claim")
+            try:
+                aud = re.search(r"expected value \((.*)\)\)$", r.text).group(1)
+            except AttributeError:
+                print("IAPAuth: could not parse aud claim from 401 response")
+                return r
+
+            self.server_oauth_client_id = aud
+            self._id_token = None
+
+            # Retry the request with the new aud claim
+            # Consume content and release the original connection
+            # to allow our new request to reuse the same one.
+            _ = r.content
+            r.close()
+            prep = r.request.copy()
+            extract_cookies_to_jar(prep._cookies, r.request, r.raw)
+            prep.prepare_cookies(prep._cookies)
+
+            prep.headers["Authorization"] = "Bearer {}".format(self.id_token)
+
+            _r = r.connection.send(prep, **kwargs)
+            _r.history.append(r)
+            _r.request = prep
+
+            return _r
+
+        return r
+
     def __call__(self, r):
         r.headers["Authorization"] = "Bearer {}".format(self.id_token)
+        r.register_hook("response", self.handle_401)
         return r
 
     @property
