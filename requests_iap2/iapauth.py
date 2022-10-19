@@ -98,8 +98,10 @@ class IAPAuth(requests.auth.AuthBase):
             "client_secret": self.credentials.client_secret,
             "refresh_token": self.credentials.refresh_token,
             "grant_type": "refresh_token",
-            "audience": self.server_oauth_client_id,
         }
+
+        if self.server_oauth_client_id is not None:
+            data["audience"] = self.server_oauth_client_id
 
         response = requests.post(self.credentials.token_uri, data=data)
         response.raise_for_status()
