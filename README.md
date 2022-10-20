@@ -9,7 +9,7 @@ Original inspiration came from https://github.com/kiwicom/requests-iap
 ## Installation
 
 ```
-pip install git+https://github.com/climateengine/requests-iap2@main
+pip install requests-iap2
 ```
 
 ## Usage
