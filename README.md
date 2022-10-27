@@ -72,6 +72,12 @@ session.auth = IAPAuth()
 
 ## Development
 
+### Future work
+
+- [ ] Add tests
+- [ ] Add support for service account credentials
+- [ ] Add support for ADC (Application Default Credentials)
+
 ### Code formatting
 
 [black](https://github.com/ambv/black/)
