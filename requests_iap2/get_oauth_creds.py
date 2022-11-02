@@ -1,6 +1,13 @@
-from pathlib import Path
 import json
+import os
+from pathlib import Path
+
+from google.auth import exceptions
+from google.oauth2 import id_token
+from google.oauth2 import service_account
 from google.oauth2.credentials import Credentials
+
+from exceptions import UserCredentialError, FileCredentialsError
 
 _DEFAULT_OAUTH_PARAMS = {
     "installed": {
@@ -16,8 +23,46 @@ _DEFAULT_CACHE_FILENAME = ".requests_iap2_credentials.json"
 _DEFAULT_PORT = 8044
 
 
-def get_credentials(client_id=None, client_secret=None, credentials_cache=None):
-    creds = get_oauth_creds(
+def fetch_env_credentials(server_client_id):
+    if server_client_id is None:
+        server_client_id = 'default'
+    credentials_filename = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+    if credentials_filename:
+        if not (
+            os.path.exists(credentials_filename)
+            and os.path.isfile(credentials_filename)
+        ):
+            raise exceptions.DefaultCredentialsError(
+                "GOOGLE_APPLICATION_CREDENTIALS path is either not found or invalid."
+            )
+
+        try:
+            with open(credentials_filename, "r") as f:
+
+                info = json.load(f)
+                if info.get("type") == "service_account":
+                    return service_account.IDTokenCredentials.from_service_account_info(info, target_audience=server_client_id)
+                else:
+                    raise exceptions.DefaultCredentialsError(
+                        "GOOGLE_APPLICATION_CREDENTIALS is not a service account."
+                    )
+        except (ValueError, json.decoder.JSONDecodeError) as caught_exc:
+            raise exceptions.DefaultCredentialsError(
+                "GOOGLE_APPLICATION_CREDENTIALS is not valid service account credentials.",
+                caught_exc,
+            )
+    else:
+        raise exceptions.DefaultCredentialsError(
+            "GOOGLE_APPLICATION_CREDENTIALS environment variable is not set."
+        )
+
+
+def fetch_gcp_credentials(server_client_id):
+    return id_token.fetch_id_token_credentials(server_client_id)
+
+
+def fetch_user_credentials(client_id=None, client_secret=None, credentials_cache=None):
+    creds = get_user_oauth_creds(
         credentials_cache=credentials_cache,
         client_id=client_id,
         client_secret=client_secret,
@@ -27,10 +72,7 @@ def get_credentials(client_id=None, client_secret=None, credentials_cache=None):
     return Credentials(**creds)
 
 
-def get_oauth_creds(client_id=None, client_secret=None, credentials_cache=None):
-    if credentials_cache is None:
-        credentials_cache = Path.home() / _DEFAULT_CACHE_FILENAME
-
+def get_user_oauth_creds(client_id=None, client_secret=None, credentials_cache=None):
     if Path.exists(credentials_cache):
         with open(credentials_cache) as f:
             try:
@@ -55,7 +97,7 @@ def auth_flow(client_id, client_secret):
     """Returns a dictionary of environment variables needed for authentication."""
 
     if client_id is None or client_secret is None:
-        raise ValueError("Must provide client_id and client_secret for first-time auth")
+        raise UserCredentialError("Must provide client_id and client_secret for first-time auth")
 
     from google_auth_oauthlib.flow import InstalledAppFlow
 

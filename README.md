@@ -4,7 +4,7 @@ Google Cloud [Identity-Aware Proxy](https://cloud.google.com/iap/) using **user*
 
 This is in contrast to most other IAP authentication libraries which use **service account** credentials.
 
-Original inspiration came from https://github.com/kiwicom/requests-iap 
+Original inspiration came from https://github.com/kiwicom/requests-iap
 
 ## Installation
 
@@ -35,7 +35,7 @@ import requests
 from requests_iap2 import IAPAuth
 
 # This is the URL of the IAP-protected resource
-url = "https://stac-staging.climateengine.net/"
+url = "https://example.net/"
 
 # Create a requests Session object and set the authentication handler
 session = requests.Session()
