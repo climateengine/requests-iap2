@@ -104,6 +104,19 @@ class IAPAuth(requests.auth.AuthBase):
             data["audience"] = self.server_oauth_client_id
 
         response = requests.post(self.credentials.token_uri, data=data)
+        if response.status_code == 400:
+            try:
+                error = response.json()["error"]
+            except (KeyError, ValueError):
+                error = "invalid_request"
+            if error == "invalid_audience":
+                raise ValueError(
+                    "The client_oauth_client_id must from the same GCP project as the IAP-protected resource."
+                )
+            else:
+                raise ValueError(
+                    "Invalid client_oauth_client_id or client_oauth_client_secret."
+                )
         response.raise_for_status()
         self._oidc_token = response.json()
         self._oidc_token[
