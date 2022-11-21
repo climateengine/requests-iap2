@@ -16,6 +16,8 @@ def create_client_id_file(client_id, client_secret, client_id_file=None):
     with open(client_id_file, "w") as f:
         json.dump(credentials, f)
 
+    print(f"Created client ID file: {client_id_file}")
+
 
 if __name__ == "__main__":
     import argparse

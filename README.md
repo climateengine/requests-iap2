@@ -19,14 +19,9 @@ You will need to have a Google Cloud project with IAP enabled and a user account
 
 Additionally, you will need to create 2 OAuth 2.0 client IDs in the Google Cloud Console:
 one for the IAP server (created as a Web application) and one for the client application (created as a Desktop application).
-You will need the client ID and secret for the client application.
+You will need the client ID and secret for the "desktop" client application.
 
-If you have not already set up Application Default Credentials, you will need to do so with the following command:
-```shell
-gcloud auth login
-gcloud auth application-default login
-```
-You should only have to do this once per machine.
+In most cases, IAP will have already creates a "Web application" client ID for you, and you do not need to create a new one.
 
 ### Example
 
@@ -41,34 +36,56 @@ url = "https://stac-staging.climateengine.net/"
 session = requests.Session()
 session.auth = IAPAuth(
     server_oauth_client_id="something.apps.googleusercontent.com",  # optional
-    client_oauth_client_id="something_else.apps.googleusercontent.com",
-    client_oauth_client_secret="client_secret_fjnclakjwencaiewnl",
+    client_oauth_client_id="something_else.apps.googleusercontent.com",  # "Desktop" client
+    client_oauth_client_secret="client_secret_key",  # "Desktop" client secret
 )
 
-resp = session.get(url)
+# Use the session to make requests
+r = session.get(url)
 
 # Alternatively, you can use the IAPAuth without a Session object
-resp = requests.get(url,
+r = requests.get(url,
                     auth=IAPAuth(
                         server_oauth_client_id="something.apps.googleusercontent.com",  # optional
                         client_oauth_client_id="something_else.apps.googleusercontent.com",
-                        client_oauth_client_secret="client_secret_fjnclakjwencaiewnl"),
+                        client_oauth_client_secret="client_secret_key"),
                     )
 ```
 
-### Caching
-Credentials are cached in a file specified by the optional `credentials_cache` parameter.
-The default is `~/.requests_iap2_credentials.json`.
-If this file exists, it will be used to load the credentials, and specifying `client_oauth_client_id` and 
-`client_oauth_client_secret` will be optional. i.e. you won't need to specify these parameters again:
+## Cross-Project Access
+ADC credentials only work within the same project as the IAP resource.
+
+If you are running in Vertex AI, you can change the project that ADC uses, but the process can be a bit cumbersome.
+
+In the Vertex AI notebook, run the following, replacing `client_oauth_client_id` and `client_oauth_client_secret` with 
+the values from the "Desktop" client ID you created in the Google Cloud Console.
 
 ```python
-import requests
-from requests_iap2 import IAPAuth
+from requests_iap2.create_client_id_file import create_client_id_file
 
-session = requests.Session()
-session.auth = IAPAuth()
+create_client_id_file(client_oauth_client_id, client_oauth_client_secret)
 ```
+
+This will create a file called `client_id.json` in the current directory.
+
+Then in the Vertex AI notebook, create a Terminal and run the following:
+
+```bash
+gcloud auth application-default login --no-browser --client-id-file=client_id.json
+```
+
+You will be given a very long command to copy. **You will need to run this command in a Terminal outside of the Vertex AI notebook.**
+
+Copy and paste the command into a terminal running on your local machine. You will be required to go through multiple
+prompts to authenticate.
+
+You may receive an error message in a browser that says "Google hasn't verified this app".
+To continue, click "Advanced" and then "Go to <app name> (unsafe)".
+
+Check both boxes to allow the app to access your Google account and then click "Continue".
+
+After allowing access, your local terminal will display a code that you will need to copy and paste into the 
+terminal running in Vertex AI notebook.  Note: this code may look like a url starting with `https://localhost:8085/...`
 
 ## Development
 

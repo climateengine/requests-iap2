@@ -37,6 +37,7 @@ class IAPAuth(requests.auth.AuthBase):
             )
         self.credentials = credentials
         self.server_oauth_client_id = server_oauth_client_id
+        self.use_adc = use_adc
         self._oidc_token = None
         self._id_token = None
 
@@ -107,9 +108,13 @@ class IAPAuth(requests.auth.AuthBase):
             except (KeyError, ValueError):
                 error = "invalid_request"
             if error == "invalid_audience":
+                if self.use_adc:
+                    raise ValueError(
+                        "ADC credentials only work within the same project as the IAP resource. "
+                        "If you are running this in a Vertex AI notebook, see "
+                    )
                 raise ValueError(
                     "The client_oauth_client_id must from the same GCP project as the IAP-protected resource. "
-                    "Full error: {}".format(response.text)
                 )
             else:
                 raise ValueError(

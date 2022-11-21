@@ -14,29 +14,20 @@ def get_credentials(client_id, client_secret, use_adc=False):
     else:
         creds = get_app_creds(client_id, client_secret)
 
-    if "expiry" in creds:
-        del creds["expiry"]
-
-    return Credentials(**creds)
+    return creds
 
 
 def get_adc_creds():
     creds, _ = google.auth.default(scopes=_SCOPES)
-
-    creds = json.loads(creds.to_json())
-
     return creds
 
 
 def get_app_creds(client_id, client_secret):
     creds = auth_flow(client_id=client_id, client_secret=client_secret)
-
     return creds
 
 
 def auth_flow(client_id, client_secret):
-    """Returns a dictionary of environment variables needed for authentication."""
-
     from google_auth_oauthlib.flow import InstalledAppFlow
 
     client_config = _DEFAULT_OAUTH_PARAMS.copy()
@@ -65,4 +56,4 @@ def auth_flow(client_id, client_secret):
             if port > _DEFAULT_PORT + 100:
                 raise
 
-    return json.loads(credentials.to_json())
+    return credentials
