@@ -22,12 +22,12 @@ class IAPAuth(requests.auth.AuthBase):
     credentials: Credentials
 
     def __init__(
-            self,
-            credentials: Credentials = None,
-            server_oauth_client_id: str = None,
-            client_oauth_client_id: str = None,
-            client_oauth_client_secret: str = None,
-            use_adc: bool = False,
+        self,
+        credentials: Credentials = None,
+        server_oauth_client_id: str = None,
+        client_oauth_client_id: str = None,
+        client_oauth_client_secret: str = None,
+        use_adc: bool = False,
     ):
         if credentials is None:
             credentials = get_credentials(
@@ -43,8 +43,8 @@ class IAPAuth(requests.auth.AuthBase):
 
     def handle_401(self, r, **kwargs):
         if (
-                r.status_code == 401
-                and r.headers.get("X-Goog-IAP-Generated-Response") == "true"
+            r.status_code == 401
+            and r.headers.get("X-Goog-IAP-Generated-Response") == "true"
         ):
             # print("IAPAuth: 401 response from IAP, retrying with new aud claim")
             try:
@@ -110,8 +110,9 @@ class IAPAuth(requests.auth.AuthBase):
             if error == "invalid_audience":
                 if self.use_adc:
                     raise ValueError(
-                        "ADC credentials only work within the same project as the IAP resource. "
+                        "he client_oauth_client_id must from the same GCP project as the IAP-protected resource. "
                         "If you are running this in a Vertex AI notebook, see "
+                        "https://github.com/climateengine/requests-iap2/tree/main#cross-project-access"
                     )
                 raise ValueError(
                     "The client_oauth_client_id must from the same GCP project as the IAP-protected resource. "

@@ -8,11 +8,20 @@ Original inspiration came from https://github.com/kiwicom/requests-iap
 
 ## Installation
 
-```
+Typical installation via pip:
+
+```shell
 pip install requests-iap2
 ```
 
-## Usage
+Alternatively you can install from source:
+
+```shell
+git clone https://github.com/climateengine/requests-iap2.git
+cd requests-iap2
+pip install .
+```
+
 
 ### Setup
 You will need to have a Google Cloud project with IAP enabled and a user account with `IAP Webapp User` role.
@@ -22,6 +31,8 @@ one for the IAP server (created as a Web application) and one for the client app
 You will need the client ID and secret for the "desktop" client application.
 
 In most cases, IAP will have already creates a "Web application" client ID for you, and you do not need to create a new one.
+
+## Usage
 
 ### Example
 
@@ -35,9 +46,10 @@ url = "https://stac-staging.climateengine.net/"
 # Create a requests Session object and set the authentication handler
 session = requests.Session()
 session.auth = IAPAuth(
-    server_oauth_client_id="something.apps.googleusercontent.com",  # optional
     client_oauth_client_id="something_else.apps.googleusercontent.com",  # "Desktop" client
     client_oauth_client_secret="client_secret_key",  # "Desktop" client secret
+    server_oauth_client_id="something.apps.googleusercontent.com",  # optional, "Web" client created by IAP
+    use_adc=False,  # optional, set to True if running in GCP (Vertex AI, AI Platform, etc.)
 )
 
 # Use the session to make requests
@@ -57,35 +69,38 @@ ADC credentials only work within the same project as the IAP resource.
 
 If you are running in Vertex AI, you can change the project that ADC uses, but the process can be a bit cumbersome.
 
-In the Vertex AI notebook, run the following, replacing `client_oauth_client_id` and `client_oauth_client_secret` with 
-the values from the "Desktop" client ID you created in the Google Cloud Console.
+In the Vertex AI notebook (Python), run the following, replacing `client_oauth_client_id` and 
+`client_oauth_client_secret` with the values from the "Desktop" OAuth2 client.
 
 ```python
 from requests_iap2.create_client_id_file import create_client_id_file
 
-create_client_id_file(client_oauth_client_id, client_oauth_client_secret)
+create_client_id_file(client_id, client_secret)
 ```
 
 This will create a file called `client_id.json` in the current directory.
 
-Then in the Vertex AI notebook, create a Terminal and run the following:
+Then in the Vertex AI notebook, create a *Terminal* and run the following (this wii not work in the Python notebook):
 
-```bash
+```shell
 gcloud auth application-default login --no-browser --client-id-file=client_id.json
 ```
 
 You will be given a very long command to copy. **You will need to run this command in a Terminal outside of the Vertex AI notebook.**
 
-Copy and paste the command into a terminal running on your local machine. You will be required to go through multiple
+Copy and paste the command into a terminal running *on your local machine*. You will be required to go through multiple
 prompts to authenticate.
 
 You may receive an error message in a browser that says "Google hasn't verified this app".
 To continue, click "Advanced" and then "Go to <app name> (unsafe)".
 
-Check both boxes to allow the app to access your Google account and then click "Continue".
+Check the boxes to allow the app to access your Google account and then click "Continue".
 
 After allowing access, your local terminal will display a code that you will need to copy and paste into the 
 terminal running in Vertex AI notebook.  Note: this code may look like a url starting with `https://localhost:8085/...`
+
+Your Vertex AI notebook should now be able to authenticate to an IAP resource in a different project.
+You may need to restart the notebook kernel to pick up the new credentials.
 
 ## Development
 
@@ -93,7 +108,7 @@ terminal running in Vertex AI notebook.  Note: this code may look like a url sta
 
 - [ ] Add tests
 - [ ] Add support for service account credentials
-- [ ] Add support for ADC (Application Default Credentials)
+- [x] Add support for ADC (Application Default Credentials)
 
 ### Code formatting
 
