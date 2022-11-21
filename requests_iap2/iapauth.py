@@ -6,7 +6,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from requests.auth import AuthBase, extract_cookies_to_jar
 
-from get_credentials import get_credentials
+from .get_credentials import get_credentials
 
 
 class IAPAuth(requests.auth.AuthBase):

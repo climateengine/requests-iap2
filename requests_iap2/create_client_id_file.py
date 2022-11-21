@@ -1,6 +1,6 @@
 import json
 
-from constants import _DEFAULT_OAUTH_PARAMS
+from requests_iap2.constants import _DEFAULT_OAUTH_PARAMS
 
 
 def create_client_id_file(client_id, client_secret, client_id_file=None):

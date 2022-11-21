@@ -3,7 +3,7 @@ import json
 import google.auth
 from google.oauth2.credentials import Credentials
 
-from constants import _DEFAULT_OAUTH_PARAMS, _SCOPES
+from .constants import _DEFAULT_OAUTH_PARAMS, _SCOPES
 
 _DEFAULT_PORT = 8044
 
