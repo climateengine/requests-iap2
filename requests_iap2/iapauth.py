@@ -6,10 +6,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from requests.auth import AuthBase, extract_cookies_to_jar
 
-from requests_iap2.get_oauth_creds import get_credentials
-
-
-# https://cloud.google.com/iap/docs/authentication-howto
+from .get_credentials import get_credentials
 
 
 class IAPAuth(requests.auth.AuthBase):
@@ -30,16 +27,17 @@ class IAPAuth(requests.auth.AuthBase):
         server_oauth_client_id: str = None,
         client_oauth_client_id: str = None,
         client_oauth_client_secret: str = None,
-        credentials_cache: str = None,
+        use_adc: bool = False,
     ):
         if credentials is None:
             credentials = get_credentials(
-                credentials_cache=credentials_cache,
                 client_id=client_oauth_client_id,
                 client_secret=client_oauth_client_secret,
+                use_adc=use_adc,
             )
         self.credentials = credentials
         self.server_oauth_client_id = server_oauth_client_id
+        self.use_adc = use_adc
         self._oidc_token = None
         self._id_token = None
 
@@ -110,8 +108,14 @@ class IAPAuth(requests.auth.AuthBase):
             except (KeyError, ValueError):
                 error = "invalid_request"
             if error == "invalid_audience":
+                if self.use_adc:
+                    raise ValueError(
+                        "he client_oauth_client_id must from the same GCP project as the IAP-protected resource. "
+                        "If you are running this in a Vertex AI notebook, see "
+                        "https://github.com/climateengine/requests-iap2/tree/main#cross-project-access"
+                    )
                 raise ValueError(
-                    "The client_oauth_client_id must from the same GCP project as the IAP-protected resource."
+                    "The client_oauth_client_id must from the same GCP project as the IAP-protected resource. "
                 )
             else:
                 raise ValueError(
