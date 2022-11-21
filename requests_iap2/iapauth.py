@@ -108,7 +108,8 @@ class IAPAuth(requests.auth.AuthBase):
                 error = "invalid_request"
             if error == "invalid_audience":
                 raise ValueError(
-                    "The client_oauth_client_id must from the same GCP project as the IAP-protected resource."
+                    "The client_oauth_client_id must from the same GCP project as the IAP-protected resource. "
+                    "Full error: {}".format(response.text)
                 )
             else:
                 raise ValueError(
