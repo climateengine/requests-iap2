@@ -49,7 +49,8 @@ session.auth = IAPAuth(
     client_oauth_client_id="something_else.apps.googleusercontent.com",  # "Desktop" client
     client_oauth_client_secret="client_secret_key",  # "Desktop" client secret
     server_oauth_client_id="something.apps.googleusercontent.com",  # optional, "Web" client created by IAP
-    use_adc=False,  # optional, set to True if running in GCP (Vertex AI, AI Platform, etc.)
+    use_adc=False,  # optional, set to True to use ADC instead of user credentials
+    oob=False,  # optional, set to True if running in a headless environment or cannot run a webserver (e.g. on Vertex AI)
 )
 
 # Use the session to make requests
@@ -64,7 +65,12 @@ r = requests.get(url,
                     )
 ```
 
-## Cross-Project Access
+### On Vertex AI or Cloud AI Platform Notebooks
+
+If you are running on Vertex AI or Cloud AI Platform Notebooks, you will need to set `oob=True` when creating the `IAPAuth` object.
+
+
+## Cross-Project ADC Credentials
 ADC credentials only work within the same project as the IAP resource.
 
 If you are running in Vertex AI, you can change the project that ADC uses, but the process can be a bit cumbersome.

@@ -28,16 +28,19 @@ class IAPAuth(requests.auth.AuthBase):
         client_oauth_client_id: str = None,
         client_oauth_client_secret: str = None,
         use_adc: bool = False,
+        oob: bool = False,
     ):
         if credentials is None:
             credentials = get_credentials(
                 client_id=client_oauth_client_id,
                 client_secret=client_oauth_client_secret,
                 use_adc=use_adc,
+                oob=oob,
             )
         self.credentials = credentials
         self.server_oauth_client_id = server_oauth_client_id
         self.use_adc = use_adc
+        self.oob = oob
         self._oidc_token = None
         self._id_token = None
 
@@ -110,7 +113,7 @@ class IAPAuth(requests.auth.AuthBase):
             if error == "invalid_audience":
                 if self.use_adc:
                     raise ValueError(
-                        "he client_oauth_client_id must from the same GCP project as the IAP-protected resource. "
+                        "The client_oauth_client_id must from the same GCP project as the IAP-protected resource. "
                         "If you are running this in a Vertex AI notebook, see "
                         "https://github.com/climateengine/requests-iap2/tree/main#cross-project-access"
                     )
