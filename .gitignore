@@ -156,3 +156,9 @@ crashlytics-build.properties
 .python-version
 
 requests_iap2/_version.py
+
+# Service Account Key
+*.json
+
+# Client specific tests
+tests/client-specific
