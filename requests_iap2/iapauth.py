@@ -27,13 +27,13 @@ class IAPAuth(requests.auth.AuthBase):
             server_oauth_client_id: str = None,
             client_oauth_client_id: str = None,
             client_oauth_client_secret: str = None,
-            headless: bool = False,
+            use_adc: bool = False,
     ):
         if credentials is None:
             credentials = get_credentials(
                 client_id=client_oauth_client_id,
                 client_secret=client_oauth_client_secret,
-                headless=headless,
+                use_adc=use_adc,
             )
         self.credentials = credentials
         self.server_oauth_client_id = server_oauth_client_id

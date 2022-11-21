@@ -8,8 +8,8 @@ from constants import _DEFAULT_OAUTH_PARAMS, _SCOPES
 _DEFAULT_PORT = 8044
 
 
-def get_credentials(client_id, client_secret, headless=False):
-    if headless:
+def get_credentials(client_id, client_secret, use_adc=False):
+    if use_adc:
         creds = get_adc_creds()
     else:
         creds = get_app_creds(client_id, client_secret)
