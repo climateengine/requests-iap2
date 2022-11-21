@@ -6,10 +6,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from requests.auth import AuthBase, extract_cookies_to_jar
 
-from requests_iap2.get_oauth_creds import get_credentials
-
-
-# https://cloud.google.com/iap/docs/authentication-howto
+from get_credentials import get_credentials
 
 
 class IAPAuth(requests.auth.AuthBase):
@@ -25,18 +22,18 @@ class IAPAuth(requests.auth.AuthBase):
     credentials: Credentials
 
     def __init__(
-        self,
-        credentials: Credentials = None,
-        server_oauth_client_id: str = None,
-        client_oauth_client_id: str = None,
-        client_oauth_client_secret: str = None,
-        credentials_cache: str = None,
+            self,
+            credentials: Credentials = None,
+            server_oauth_client_id: str = None,
+            client_oauth_client_id: str = None,
+            client_oauth_client_secret: str = None,
+            headless: bool = False,
     ):
         if credentials is None:
             credentials = get_credentials(
-                credentials_cache=credentials_cache,
                 client_id=client_oauth_client_id,
                 client_secret=client_oauth_client_secret,
+                headless=headless,
             )
         self.credentials = credentials
         self.server_oauth_client_id = server_oauth_client_id
@@ -45,8 +42,8 @@ class IAPAuth(requests.auth.AuthBase):
 
     def handle_401(self, r, **kwargs):
         if (
-            r.status_code == 401
-            and r.headers.get("X-Goog-IAP-Generated-Response") == "true"
+                r.status_code == 401
+                and r.headers.get("X-Goog-IAP-Generated-Response") == "true"
         ):
             # print("IAPAuth: 401 response from IAP, retrying with new aud claim")
             try:
