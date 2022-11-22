@@ -44,11 +44,16 @@ def auth_flow_oob(client_id, client_secret):
     auth_url, _ = flow.authorization_url(prompt='consent')
     print("Please go to the following URL:")
     print(auth_url)
-    print("""After authenticating, you will be redirected to a page that says: "This site can't be reached". This is normal. """)
-    print("Copy and paste the url from your browsers url bar below (it should start with https://localhost):")
+    print()
+    print("***PLEASE READ***")
+    print("""After authenticating, you will be redirected to a page with an error message.""")
+    print("""THIS IS NORMAL. The error will say something like: "This site can't be reached". """)
+    print()
+    print("After you are redirected to the page with the error, COPY THE URL FROM THE BROWSER'S ADDRESS BAR "
+          "and paste it below (it should start with https://localhost):")
     authorization_response = input()
 
-    cred = flow.fetch_token(authorization_response=authorization_response)
+    flow.fetch_token(authorization_response=authorization_response)
 
     credentials = flow.credentials
 
