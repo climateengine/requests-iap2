@@ -67,7 +67,11 @@ r = requests.get(url,
 
 ### On Vertex AI or Cloud AI Platform Notebooks
 
-If you are running on Vertex AI or Cloud AI Platform Notebooks, you will need to set `oob=True` when creating the `IAPAuth` object.
+If you are running on Vertex AI or Cloud AI Platform Notebooks, you will need to set `oob=True` to specify Out of Band (OOB) authentication when creating the `IAPAuth` object. 
+
+Other reasons that you may need to set `oob=True` would be for security readons or if you are running the program on a restricted VM.
+
+Please note that setting `oob=True` will generate an "unable to connect" or "host unreachable" error. This is expected and does not indicate authentication failure, so if you have received this error be sure and continue on to test the API authentication by making a GET request to an API endpoint.
 
 
 ## Cross-Project ADC Credentials
