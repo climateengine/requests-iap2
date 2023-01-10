@@ -84,9 +84,11 @@ def auth_flow(client_id, client_secret):
                 success_message="The auth flow is complete; you may close this window.",
                 open_browser=True,
             )
-        except OSError:
-            port += 1
-            if port > _DEFAULT_PORT + 100:
-                raise
+        except OSError as e:
+            if e.errno == 98 and port < _DEFAULT_PORT + 10:
+                port += 1
+                continue
+            else:
+                raise e
 
     return credentials
