@@ -26,11 +26,15 @@ pip install .
 ### Setup
 You will need to have a Google Cloud project with IAP enabled and a user account with `IAP Webapp User` role.
 
-Additionally, you will need to create 2 OAuth 2.0 client IDs in the Google Cloud Console:
-one for the IAP server (created as a Web application) and one for the client application (created as a Desktop application).
-You will need the client ID and secret for the "desktop" client application.
+Additionally, you will need to create a OAuth 2.0 client ID and secret in the Google Cloud Console:
+[Instructions for creating a new OAuth 2.0 client.](https://support.google.com/cloud/answer/6158849)
 
-In most cases, IAP will have already creates a "Web application" client ID for you, and you do not need to create a new one.
+  - This must be in the same GCP project as the IAP server.
+  - The OAuth client must be created as a **Desktop application**
+
+In most cases, IAP will have already creates a "Web application" client ID for you, so you will have 2 clients,
+the "Web application" created by IAP, and the "Desktop application" you just created.
+
 
 ## Usage
 
@@ -41,7 +45,7 @@ import requests
 from requests_iap2 import IAPAuth
 
 # This is the URL of the IAP-protected resource
-url = "https://stac-staging.climateengine.net/"
+url = "https://api.climateengine.net/"
 
 # Create a requests Session object and set the authentication handler
 session = requests.Session()
